@@ -85,7 +85,12 @@ extends MovementModel {
           new Coord(700, 100),
           new Coord(700, 400),
           new Coord(500, 400),
-          new Coord(100, 400)
+          new Coord(100, 400),
+          new Coord(50, 350),
+          new Coord(0, 350),
+          new Coord(-50, 400),
+          new Coord(-50, 450),
+          new Coord(0, 500)
   );
 
   private Coord lastWaypoint;

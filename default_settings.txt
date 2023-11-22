@@ -1,11 +1,10 @@
-## Settings that define ProhibitedPolygonRwp movement with two groups.
-## One group is confined inside the polygon, the other outside.
+# Settings for map route based movement in a triangle.
 
-Scenario.name = ProhibitedPolygon2
+Scenario.name = MapRouteMovement
 Scenario.endTime = 6000
 Scenario.updateInterval = 0.1
 Scenario.simulateConnections = false
-MovementModel.worldSize = 3000,2000
+MovementModel.worldSize = 2500,1000
 Events.nrof = 0
 
 # Communication Interface
@@ -14,18 +13,32 @@ myInterface.transmitRange = 0
 myInterface.transmitSpeed = 0
 
 # Groups
-Scenario.nrofHostGroups = 1
+Scenario.nrofHostGroups = 2
 
-Group1.groupID = y
-Group1.nrofHosts = 10
+Group1.groupID = x
+Group1.nrofHosts = 1
 Group1.nrofInterfaces = 1
 Group1.interface1 = myInterface
-Group1.movementModel = ProhibitedPolygonRwp
-Group1.rwpInvert = true
-Group1.router = PassiveRouter
+Group1.movementModel = MapRouteMovement
 Group1.routeFile = data/fmi_building.wkt
-Group2.routeFile = data/fmi_horsal.wkt
+Group1.routeType = 1
+Group1.router = PassiveRouter
+
+Group2.groupID = y
+Group2.nrofHosts = 5
+Group2.nrofInterfaces = 1
+Group2.interface1 = myInterface
+Group2.movementModel = ProhibitedPolygonRwp
+Group2.rwpInvert = true
+Group2.router = PassiveRouter
+
+## Map based movement -movement model specific settings
+MapBasedMovement.nrofMapFiles = 2
+MapBasedMovement.mapFile1 = data/fmi_building.wkt
+MapBasedMovement.mapFile2 = data/fmi_horsal.wkt
 
 # Reports
-Report.nrofReports = 0
+Report.nrofReports = 1
+Report.report1 = FlightLengthReport
+
 Report.reportDir = reports
