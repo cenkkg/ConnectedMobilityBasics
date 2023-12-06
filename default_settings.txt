@@ -13,10 +13,10 @@ myInterface.transmitRange = 0
 myInterface.transmitSpeed = 0
 
 # Groups
-Scenario.nrofHostGroups = 2
+Scenario.nrofHostGroups = 6
 
-Group1.groupID = x
-Group1.nrofHosts = 1
+Group1.groupID = a
+Group1.nrofHosts = 0
 Group1.nrofInterfaces = 1
 Group1.interface1 = myInterface
 Group1.movementModel = MapRouteMovement
@@ -24,13 +24,48 @@ Group1.routeFile = data/fmi_building.wkt
 Group1.routeType = 1
 Group1.router = PassiveRouter
 
-Group2.groupID = y
+Group2.groupID = b
 Group2.nrofHosts = 5
 Group2.nrofInterfaces = 1
 Group2.interface1 = myInterface
 Group2.movementModel = ProhibitedPolygonRwp
 Group2.rwpInvert = true
 Group2.router = PassiveRouter
+
+Group3.groupID = c
+Group3.nrofHosts = 3
+Group3.nrofInterfaces = 1
+Group3.interface1 = myInterface
+Group3.movementModel = ClusterMovement
+Group3.clusterCenter = 1400,300
+Group3.speed = 0.05,0.05
+Group3.waitTime = 0,120
+Group3.router = PassiveRouter
+
+Group4.groupID = d
+Group4.nrofHosts = 3
+Group4.nrofInterfaces = 1
+Group4.interface1 = myInterface
+Group4.movementModel = RandomWaypoint
+Group4.router = PassiveRouter
+
+Group5.groupID = e
+Group5.nrofHosts = 3
+Group5.nrofInterfaces = 1
+Group5.interface1 = myInterface
+Group5.movementModel = ProhibitedCanteen
+Group5.rwpInvert = true
+Group5.router = PassiveRouter
+
+Group6.groupID = f
+Group6.nrofHosts = 5
+Group6.nrofInterfaces = 1
+Group6.interface1 = myInterface
+Group6.movementModel = ClusterMovement
+Group6.clusterCenter = 800,400
+Group6.speed = 0.05,0.05
+Group6.waitTime = 0,120
+Group6.router = PassiveRouter
 
 ## Map based movement -movement model specific settings
 MapBasedMovement.nrofMapFiles = 2
