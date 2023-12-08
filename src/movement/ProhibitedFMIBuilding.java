@@ -22,8 +22,8 @@ import java.util.*;
  *
  * @author teemuk
  */
-public class ProhibitedCanteen
-        extends MovementModel {
+public class ProhibitedFMIBuilding
+        extends MapBasedMovement {
 
     //==========================================================================//
     // Settings
@@ -114,8 +114,8 @@ public class ProhibitedCanteen
     }
 
     @Override
-    public ProhibitedCanteen replicate() {
-        return new ProhibitedCanteen( this );
+    public ProhibitedFMIBuilding replicate() {
+        return new ProhibitedFMIBuilding( this );
     }
 
     private Coord randomCoord() {
@@ -129,11 +129,8 @@ public class ProhibitedCanteen
     //==========================================================================//
     // API
     //==========================================================================//
-    public ProhibitedCanteen( final Settings settings ) {
+    public ProhibitedFMIBuilding( final Settings settings ) {
         super( settings );
-        // Read the invert setting
-        map = readMap();
-        readOkMapNodeTypes(settings);
         this.invert = settings.getBoolean( INVERT_SETTING, INVERT_DEFAULT );
         String fileName = settings.getSetting(ROUTE_FILE_S);
         WKTReader reader = new WKTReader();
@@ -145,7 +142,7 @@ public class ProhibitedCanteen
         System.out.println(polygon);
     }
 
-    public ProhibitedCanteen( final ProhibitedCanteen other ) {
+    public ProhibitedFMIBuilding( final ProhibitedFMIBuilding other ) {
         // Copy constructor will be used when settings up nodes. Only one
         // prototype node instance in a group is created using the Settings
         // passing constructor, the rest are replicated from the prototype.
@@ -248,120 +245,4 @@ public class ProhibitedCanteen
         final double C = c0.getX() * c1.getY() - c0.getY() * c1.getX();
         return new double[] { A, B, C };
     }
-
-    /**
-     * Reads a sim map from location set to the settings, mirrors the map and
-     * moves its upper left corner to origo.
-     * @return A new SimMap based on the settings
-     */
-    private SimMap readMap() {
-        SimMap simMap;
-        Settings settings = new Settings(MAP_BASE_MOVEMENT_NS);
-        WKTMapReader r = new WKTMapReader(true);
-        try {
-            int nrofMapFiles = settings.getInt(NROF_FILES_S);
-            for (int i = 1; i <= nrofMapFiles; i++ ) {
-                String pathFile = settings.getSetting(FILE_S + i);
-                r.addPaths(new File(pathFile), i);
-            }
-        } catch (IOException e) {
-            throw new SimError(e.toString(),e);
-        }
-        simMap = r.getMap();
-        checkMapConnectedness(simMap.getNodes());
-        checkCoordValidity(simMap.getNodes());
-        return simMap;
-    }
-
-    /**
-     * Checks that all map nodes can be reached from all other map nodes
-     * @param nodes The list of nodes to check
-     * @throws SettingsError if all map nodes are not connected
-     */
-    private void checkMapConnectedness(List<MapNode> nodes) {
-        Set<MapNode> visited = new HashSet<MapNode>();
-        Queue<MapNode> unvisited = new LinkedList<MapNode>();
-        MapNode firstNode;
-        MapNode next = null;
-
-        if (nodes.size() == 0) {
-            throw new SimError("No map nodes in the given map");
-        }
-
-        firstNode = nodes.get(0);
-
-        visited.add(firstNode);
-        unvisited.addAll(firstNode.getNeighbors());
-
-        while ((next = unvisited.poll()) != null) {
-            visited.add(next);
-            for (MapNode n: next.getNeighbors()) {
-                if (!visited.contains(n) && ! unvisited.contains(n)) {
-                    unvisited.add(n);
-                }
-            }
-        }
-
-        if (visited.size() != nodes.size()) { // some node couldn't be reached
-            MapNode disconnected = null;
-            for (MapNode n : nodes) { // find an example node
-                if (!visited.contains(n)) {
-                    disconnected = n;
-                    break;
-                }
-            }
-            throw new SettingsError("SimMap is not fully connected. Only " +
-                    visited.size() + " out of " + nodes.size() + " map nodes " +
-                    "can be reached from " + firstNode + ". E.g. " +
-                    disconnected + " can't be reached");
-        }
-    }
-
-    /**
-     * Checks that all coordinates of map nodes are within the min&max limits
-     * of the movement model
-     * @param nodes The list of nodes to check
-     * @throws SettingsError if some map node is out of bounds
-     */
-    private void checkCoordValidity(List<MapNode> nodes) {
-        // Check that all map nodes are within world limits
-        for (MapNode n : nodes) {
-            double x = n.getLocation().getX();
-            double y = n.getLocation().getY();
-            if (x < 0 || x > getMaxX() || y < 0 || y > getMaxY()) {
-                throw new SettingsError("Map node " + n.getLocation() +
-                        " is out of world  bounds "+
-                        "(x: 0..." + getMaxX() + " y: 0..." + getMaxY() + ")");
-            }
-        }
-    }
-
-    /**
-     * Reads the OK map node types from settings
-     * @param settings The settings where the types are read
-     */
-    private void readOkMapNodeTypes(Settings settings) {
-        if (settings.contains(MAP_SELECT_S)) {
-            this.okMapNodeTypes = settings.getCsvInts(MAP_SELECT_S);
-            for (int i : okMapNodeTypes) {
-                if (i < MapNode.MIN_TYPE || i > MapNode.MAX_TYPE) {
-                    throw new SettingsError("Map type selection '" + i +
-                            "' is out of range for setting " +
-                            settings.getFullPropertyName(MAP_SELECT_S));
-                }
-                if (i > nrofMapFilesRead) {
-                    throw new SettingsError("Can't use map type selection '" + i
-                            + "' for setting " +
-                            settings.getFullPropertyName(MAP_SELECT_S)
-                            + " because only " + nrofMapFilesRead +
-                            " map files are read");
-                }
-            }
-        }
-        else {
-            this.okMapNodeTypes = null;
-        }
-    }
-
-    //==========================================================================//
 }
