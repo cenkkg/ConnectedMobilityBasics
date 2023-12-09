@@ -2,17 +2,12 @@ package movement;
 
 import core.Coord;
 import core.Settings;
-import core.SettingsError;
-import core.SimError;
-import input.WKTMapReader;
+import core.SimClock;
 import input.WKTReader;
-import movement.map.DijkstraPathFinder;
-import movement.map.MapNode;
 import movement.map.MapRoute;
 import movement.map.SimMap;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -25,6 +20,8 @@ import java.util.*;
 public class ProhibitedFMIBuilding
         extends MapBasedMovement {
 
+    public static final int SIM_TIME = 6000;
+    public static final int SCHEDULE_LEN = 10;
     //==========================================================================//
     // Settings
     //==========================================================================//
@@ -33,36 +30,7 @@ public class ProhibitedFMIBuilding
     public static final boolean INVERT_DEFAULT = false;
     /** Per node group setting used for selecting a route file ({@value}) */
     public static final String ROUTE_FILE_S = "routeFile";
-    /**
-     * Per node group setting used for selecting a route's type ({@value}).
-     * Integer value from {@link MapRoute} class.
-     */
-    /** map based movement model's settings namespace ({@value})*/
-    public static final String MAP_BASE_MOVEMENT_NS = "MapBasedMovement";
-    /** number of map files -setting id ({@value})*/
-    public static final String NROF_FILES_S = "nrofMapFiles";
-    /** map file -setting id ({@value})*/
-    public static final String FILE_S = "mapFile";
-
-    /**
-     * Per node group setting for selecting map node types that are OK for
-     * this node group to traverse trough. Value must be a comma separated list
-     * of integers in range of [1,31]. Values reference to map file indexes
-     * (see {@link #FILE_S}). If setting is not defined, all map nodes are
-     * considered OK.
-     */
-    public static final String MAP_SELECT_S = "okMaps";
-    /** the indexes of the OK map files or null if all maps are OK */
-    private int [] okMapNodeTypes;
-
-    /** how many map files are read */
-    private int nrofMapFilesRead = 0;
-    /** map cache -- in case last mm read the same map, use it without loading*/
-    private static SimMap cachedMap = null;
-    /** names of the previously cached map's files (for hit comparison) */
-    private static List<String> cachedMapFiles = null;
-
-
+    public static final String CLASSROOMS_FILE_S = "classroomsFile";
     //==========================================================================//
 
 
@@ -71,7 +39,10 @@ public class ProhibitedFMIBuilding
     //==========================================================================//
     /** Prototype's reference to all routes read for the group */
     private List<Coord> polygon;
+    private List<Coord> classrooms;
     private Coord lastWaypoint;
+    private List<Integer> schedule;
+    private int simTime = 3600;
     /** Inverted, i.e., only allow nodes to move inside the polygon. */
     private final boolean invert;
     /** sim map for the model */
@@ -93,9 +64,29 @@ public class ProhibitedFMIBuilding
         // the path here and the simulator will follow the full path before
         // asking for the next one.
         Coord c;
-        do {
-            c = this.randomCoord();
-        } while ( pathIntersects( this.polygon, this.lastWaypoint, c ) );
+        if(SimClock.getIntTime() > SIM_TIME) {
+            p.addWaypoint( this.lastWaypoint.clone() );
+            return p;
+        }
+        int period = SimClock.getIntTime()/(SIM_TIME/SCHEDULE_LEN);
+        if(schedule.get(period) >= 0) {
+            c = classrooms.get(schedule.get(period));
+            double verMov = c.getY() - this.lastWaypoint.getY();
+            double horMov = c.getX() - this.lastWaypoint.getX();
+            boolean isFirstPass = true;
+            while ( pathIntersects( this.polygon, this.lastWaypoint, c ) ) {
+                if(isFirstPass) {
+                    c = new Coord(this.lastWaypoint.getX()+horMov, this.lastWaypoint.getY());
+                } else {
+                    c = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY()+verMov);
+                }
+                isFirstPass = false;
+            }
+        } else {
+            do {
+                c = this.randomCoord();
+            } while ( pathIntersects( this.polygon, this.lastWaypoint, c ) );
+        }
         p.addWaypoint( c );
 
         this.lastWaypoint = c;
@@ -132,14 +123,24 @@ public class ProhibitedFMIBuilding
     public ProhibitedFMIBuilding( final Settings settings ) {
         super( settings );
         this.invert = settings.getBoolean( INVERT_SETTING, INVERT_DEFAULT );
-        String fileName = settings.getSetting(ROUTE_FILE_S);
+        String buildingFileName = settings.getSetting(ROUTE_FILE_S);
+        String classroomsFileName = settings.getSetting(CLASSROOMS_FILE_S);
         WKTReader reader = new WKTReader();
         try {
-            polygon = reader.readLines(new File(fileName)).get(0);
+            polygon = reader.readLines(new File(buildingFileName)).get(0);
+            classrooms = reader.readPoints(new File(classroomsFileName));
         } catch (Exception e) {
             System.out.println(e);
         }
+        this.schedule = new ArrayList<>(Collections.nCopies(10, -1));
+        this.schedule.set(2, 0);
+        this.schedule.set(5, 0);
+        this.schedule.set(7, 0);
+        this.schedule.set(8, 0);
         System.out.println(polygon);
+        System.out.println(classrooms);
+        System.out.println(schedule);
+
     }
 
     public ProhibitedFMIBuilding( final ProhibitedFMIBuilding other ) {
@@ -150,6 +151,8 @@ public class ProhibitedFMIBuilding
         // Remember to copy any state defined in this class.
         this.invert = other.invert;
         this.polygon = other.polygon;
+        this.schedule = other.schedule;
+        this.classrooms = other.classrooms;
     }
     //==========================================================================//
 
