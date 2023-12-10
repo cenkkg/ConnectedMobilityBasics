@@ -14,6 +14,7 @@ import core.Connection;
 import core.Coord;
 import core.DTNHost;
 import core.NetworkInterface;
+import routing.VirusRouter;
 
 /**
  * Visualization of a DTN Node
@@ -117,7 +118,12 @@ public class NodeGraphic extends PlayFieldGraphic {
 		}
 
 		if (drawNodeName) {
-			g2.setColor(hostNameColor);
+			VirusRouter nodeRouter = (VirusRouter) node.getRouter();
+			if (nodeRouter.isHasBigVirus() || nodeRouter.isHasSmallVirus()) {
+				g2.setColor(Color.RED);
+			} else {
+				g2.setColor(Color.BLUE);
+			}
 			// Draw node's address next to it
 			g2.drawString(node.toString(), scale(loc.getX()),
 					scale(loc.getY()));

@@ -31,6 +31,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	private double speed;
 	private double nextTimeToMove;
 	public final String groupId;
+
 	private String name;
 	private List<MessageListener> msgListeners;
 	private List<MovementListener> movListeners;
@@ -136,6 +137,10 @@ public class DTNHost implements Comparable<DTNHost> {
 	private void setRouter(MessageRouter router) {
 		router.init(this, msgListeners);
 		this.router = router;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	/**
