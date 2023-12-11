@@ -9,6 +9,7 @@ import movement.map.SimMap;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Random Waypoint Movement with a prohibited region where nodes may not move
@@ -19,7 +20,7 @@ import java.util.*;
  */
 public class ProhibitedFMIBuilding
         extends MapBasedMovement {
-    public static final int SIM_TIME = 43000;
+    public static final int SIM_TIME = 30000;
     public static final int SCHEDULE_LEN = 10;
     //==========================================================================//
     // Settings
@@ -28,13 +29,14 @@ public class ProhibitedFMIBuilding
      * {@code true} to confine nodes inside the polygon
      */
     public static final String SIM_TIME_SETTING = "endTime";
+    public static final String SCHEDULE_SETTING = "schedule";
     public static final String INVERT_SETTING = "rwpInvert";
     public static final boolean INVERT_DEFAULT = false;
     /**
      * Per node group setting used for selecting a route file ({@value})
      */
     public static final String ROUTE_FILE_S = "routeFile";
-    public static final String CLASSROOMS_FILE_S = "classroomsFile";
+    public static final String CLASSROOMS_FILE_S = "classroomsFiles";
     //==========================================================================//
 
 
@@ -45,10 +47,11 @@ public class ProhibitedFMIBuilding
      * Prototype's reference to all routes read for the group
      */
     private int simTime;
+    private int lectureTime;
     private List<Coord> polygon;
     private List<Coord> classrooms;
     private Coord lastWaypoint;
-    private List<Integer> schedule;
+    private int[] schedule;
     /**
      * Inverted, i.e., only allow nodes to move inside the polygon.
      */
@@ -63,23 +66,20 @@ public class ProhibitedFMIBuilding
         super(settings);
         this.simTime = settings.getInt(SIM_TIME_SETTING, SIM_TIME);
         this.invert = settings.getBoolean(INVERT_SETTING, INVERT_DEFAULT);
+        this.schedule = settings.getCsvInts(SCHEDULE_SETTING, SCHEDULE_LEN);
+        this.lectureTime = (this.simTime / SCHEDULE_LEN);
         String buildingFileName = settings.getSetting(ROUTE_FILE_S);
-        String classroomsFileName = settings.getSetting(CLASSROOMS_FILE_S);
+        String[] classroomsFilesNames = settings.getCsvSetting(CLASSROOMS_FILE_S);
         WKTReader reader = new WKTReader();
         try {
             polygon = reader.readLines(new File(buildingFileName)).get(0);
-            classrooms = reader.readPoints(new File(classroomsFileName));
+            classrooms = new ArrayList<>();
+            for (String s : classroomsFilesNames) {
+                classrooms.add(reader.readPoints(new File(s)).get(0));
+            }
         } catch (Exception e) {
             System.out.println(e);
         }
-        this.schedule = new ArrayList<>(Collections.nCopies(10, -1));
-        this.schedule.set(2, 0);
-        this.schedule.set(5, 0);
-        this.schedule.set(7, 0);
-        this.schedule.set(8, 0);
-        System.out.println(polygon);
-        System.out.println(classrooms);
-        System.out.println(schedule);
 
     }
 
@@ -94,6 +94,7 @@ public class ProhibitedFMIBuilding
         this.schedule = other.schedule;
         this.classrooms = other.classrooms;
         this.simTime = other.simTime;
+        this.lectureTime = other.lectureTime;
     }
 
 
@@ -114,12 +115,10 @@ public class ProhibitedFMIBuilding
             p.addWaypoint(this.lastWaypoint.clone());
             return p;
         }
-        int period = SimClock.getIntTime() / (this.simTime / SCHEDULE_LEN);
-        System.out.println(this.simTime / SCHEDULE_LEN);
-        System.out.println(period);
-        if (schedule.get(period) >= 0) {
-            System.out.println("a");
-            c = classrooms.get(schedule.get(period));
+        int period = SimClock.getIntTime() / this.lectureTime;
+        period = period == 10 ? 9 : period;
+        if (schedule[period] >= 0) {
+            c = classrooms.get(schedule[period]);
             double verMov = c.getY() - this.lastWaypoint.getY();
             double horMov = c.getX() - this.lastWaypoint.getX();
             boolean isFirstPass = true;
@@ -132,7 +131,6 @@ public class ProhibitedFMIBuilding
                 isFirstPass = false;
             }
         } else {
-            System.out.println("b");
             do {
                 c = this.randomCoord();
             } while (pathIntersects(this.polygon, this.lastWaypoint, c));
@@ -150,7 +148,6 @@ public class ProhibitedFMIBuilding
         } while ((this.invert) ?
                 isOutside(polygon, this.lastWaypoint) :
                 isInside(this.polygon, this.lastWaypoint));
-        System.out.println(this.lastWaypoint);
         return this.lastWaypoint;
     }
 
