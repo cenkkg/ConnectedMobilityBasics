@@ -1,7 +1,7 @@
 # Settings for map route based movement in a triangle.
 
 Scenario.name = MapRouteMovement
-Scenario.endTime = 6000
+Scenario.endTime = 43k
 Scenario.updateInterval = 0.1
 Scenario.simulateConnections = false
 MovementModel.worldSize = 2500,1000
