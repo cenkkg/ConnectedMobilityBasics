@@ -15,7 +15,7 @@ firstinterface.transmitSpeed = 250k
 firstinterface.transmitRange = 10
 
 
-Scenario.nrofHostGroups = 5
+Scenario.nrofHostGroups = 2
 
 # common settings for all groups
 Group.movementModel = ClusterMovement
@@ -42,9 +42,12 @@ Group2.groupID = p
 
 Group3.groupID = q
 Group3.clusterCenter = 600, 100
+Group3.nrofInterfaces = 1
+Group3.interface1 = firstinterface
 
 Group4.groupID = r
 Group4.clusterCenter = 350, 533
+
 
 # The Tram groups
 Group5.groupID = s

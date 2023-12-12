@@ -4,7 +4,9 @@
       <root url="jar://$PROJECT_DIR$/lib/ECLA.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/DTNConsoleConnection.jar!/" />
     </CLASSES>
-    <JAVADOC />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../../junit-4.13.2-javadoc.jar!/" />
+    </JAVADOC>
     <SOURCES />
   </library>
 </component>

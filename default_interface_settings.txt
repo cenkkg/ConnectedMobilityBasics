@@ -7,15 +7,11 @@ Scenario.nrofHostGroups = 2
 Scenario.updateInterval = 0.1
 
 #-------------------------
-bigvirusinterface.type = BigVirusInterface
+bigvirusinterface.type = SimpleBroadcastInterface
 # transmit speed of 2 Mbps = 250kBps
-bigvirusinterface.transmitSpeed = 250000k
+bigvirusinterface.transmitSpeed = 250k
 bigvirusinterface.transmitRange = 10
 
-#smallvirusinterface.type = SmallVirusInterface
-# transmit speed of 2 Mbps = 250kBps
-#smallvirusinterface.transmitSpeed = 250k
-#smallvirusinterface.transmitRange = 50
 #-------------------------
 
 MovementModel.worldSize = 2000,2000
@@ -23,24 +19,25 @@ MovementModel.worldSize = 2000,2000
 
 #-------------------------
 #Group.router = VirusRouter
-Group.bufferSize = 50
+Group.bufferSize = 5M
 Group.waitTime = 0, 120
 Group.nrofInterfaces = 1
 
+
 # walking speeds
 Group.speed = 0.5, 1.5
-Group.msgTtl = 200
+# Group.msgTtl = 200
 
 Group1.interface1 = bigvirusinterface
 Group1.router = VirusRouter
 Group1.groupID = x
-Group1.nrofHosts = 10
+Group1.nrofHosts = 100
 Group1.movementModel = ProhibitedPolygonRwp
 
 Group2.interface2 = bigvirusinterface
 Group2.router = VirusRouter
 Group2.groupID = y
-Group2.nrofHosts = 10
+Group2.nrofHosts = 100
 Group2.movementModel = ProhibitedPolygonRwp
 #-------------------------
 
@@ -59,22 +56,6 @@ Events1.hosts = 0,10
 Events1.tohosts = 0,19
 # Message ID prefix
 Events1.prefix = LV
-
-## Message creation parameters
-# How many event generators
-#Events.nrof = 10
-# Class of the first event generator
-#Events2.class = SingleMessageGenerator
-# (following settings are specific for the MessageEventGenerator class)
-# Creation interval in seconds (one new message every 25 to 35 seconds)
-#Events2.interval = 500,1k
-# Message sizes (50kB - 150kB)
-#Events2.size = 50k
-# range of message source/destination addresses
-#Events2.hosts = 1,10
-#Events2.toHosts = 11,19
-# Message ID prefix
-#Events2.prefix = SV
 
 ## GUI settings
 
