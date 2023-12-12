@@ -60,16 +60,39 @@ public class VirusRouter extends ActiveRouter {
 
     @Override
     public boolean createNewMessage(Message m) {
-        this.setHasBigVirus(true);
-        this.setHasSmallVirus(true);
-        return super.createNewMessage(m);
+        System.out.println("Created virus: " + m);
+        String virusType = m.toString().substring(0, Math.min(m.toString().length(), 2));
+
+        if(virusType.equals("LV")){
+            this.setHasBigVirus(true);
+            return super.createNewMessage(m);
+        } else if (virusType.equals("SV")) {
+            this.setHasSmallVirus(true);
+            return super.createNewMessage(m);
+        } else {
+            return false;
+        }
     }
 
     @Override
     public Message messageTransferred(String id, DTNHost from) {
         Message m = super.messageTransferred(id, from);
-        if (((VirusRouter) from.getRouter()).isHasBigVirus()) {
+
+        String virusType = m.toString().substring(0, Math.min(m.toString().length(), 2));
+        if (((VirusRouter) from.getRouter()).isHasBigVirus() && virusType.equals("LV")) {
+            float virusInfectedProbability = 100.0F;
+
+            if (this.isHasBigVirus()){
+                return m;
+            }
+            if(this.isHasSmallVirus()) {
+                virusInfectedProbability = virusInfectedProbability * 0.7F;
+            } else {
+                virusInfectedProbability = virusInfectedProbability * 0.5F;
+            }
             this.setHasBigVirus(true);
+        } else if (((VirusRouter) from.getRouter()).isHasSmallVirus() && virusType.equals("SV")) {
+            this.setHasSmallVirus(true);
         }
         return m;
     }

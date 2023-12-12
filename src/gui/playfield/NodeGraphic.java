@@ -119,10 +119,12 @@ public class NodeGraphic extends PlayFieldGraphic {
 
 		if (drawNodeName) {
 			VirusRouter nodeRouter = (VirusRouter) node.getRouter();
-			if (nodeRouter.isHasBigVirus() || nodeRouter.isHasSmallVirus()) {
+			if (nodeRouter.isHasBigVirus()) {
 				g2.setColor(Color.RED);
+			} else if (nodeRouter.isHasSmallVirus()) {
+				g2.setColor(Color.YELLOW);
 			} else {
-				g2.setColor(Color.BLUE);
+				g2.setColor(Color.GREEN);
 			}
 			// Draw node's address next to it
 			g2.drawString(node.toString(), scale(loc.getX()),

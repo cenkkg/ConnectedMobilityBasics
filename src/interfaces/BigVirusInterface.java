@@ -66,8 +66,6 @@ public class BigVirusInterface extends NetworkInterface {
             }
         }
         // Then find new possible connections
-        System.out.println(optimizer.getAllInterfaces().size());
-        System.out.println("near:" + optimizer.getNearInterfaces(this).size());
         Collection<NetworkInterface> interfaces =
                 optimizer.getNearInterfaces(this);
         for (NetworkInterface i : interfaces) {
@@ -89,6 +87,8 @@ public class BigVirusInterface extends NetworkInterface {
 
             Connection con = new CBRConnection(this.host, this,
                     anotherInterface.getHost(), anotherInterface, conSpeed);
+
+            System.out.println("Connected hosts: " + this.getHost().toString() + " --- " + anotherInterface.getHost().toString());
             connect(con,anotherInterface);
         }
     }
