@@ -20,38 +20,47 @@ import java.util.concurrent.TimeUnit;
  */
 public class ProhibitedFMIBuilding
         extends MapBasedMovement {
-    public static final int SIM_TIME = 30000;
-    public static final int SCHEDULE_LEN = 10;
     //==========================================================================//
     // Settings
     //==========================================================================//
-    /**
-     * {@code true} to confine nodes inside the polygon
-     */
+    public static final int SIM_TIME = 30000;
+    public static final int SCHEDULE_LEN = 10;
+    public static final int STABLE_LOCATION_VISIT_TIME = 70;
     public static final String SIM_TIME_SETTING = "endTime";
     public static final String SCHEDULE_SETTING = "schedule";
     public static final String INVERT_SETTING = "rwpInvert";
     public static final boolean INVERT_DEFAULT = false;
+    public static final String STABLE_SETTING = "stable";
+    public static final boolean STABLE_DEFAULT = false;
     /**
-     * Per node group setting used for selecting a route file ({@value})
+     * FILES
      */
     public static final String ROUTE_FILE_S = "routeFile";
     public static final String CLASSROOMS_FILE_S = "classroomsFiles";
+    public static final String STABLE_LOCATIONS_FILE_S = "stableLocationsFiles";
+    public static final String LOCATION_FILE_S = "locationFile";
+    public static final double STABLE_LOCATION_PROBABILITY = 0.2;
     //==========================================================================//
-
 
     //==========================================================================//
     // Instance vars
     //==========================================================================//
-    /**
-     * Prototype's reference to all routes read for the group
-     */
+    // Constructor vars
     private int simTime;
-    private int lectureTime;
-    private List<Coord> polygon;
-    private List<Coord> classrooms;
     private Coord lastWaypoint;
     private int[] schedule;
+    private boolean stable;
+    private Coord stableLocation;
+    private int lectureTime;
+    private List<Coord> polygon;
+
+    // Path related vars
+    private List<Coord> classrooms;
+    private List<Coord> stableLocations;
+    private Coord stableLocationTarget;
+    private boolean stableLocationGoing;
+    private int stableLocationEnterTime;
+    private boolean stableLocationEntered;
     /**
      * Inverted, i.e., only allow nodes to move inside the polygon.
      */
@@ -64,21 +73,36 @@ public class ProhibitedFMIBuilding
 
     public ProhibitedFMIBuilding(final Settings settings) {
         super(settings);
+        WKTReader reader = new WKTReader();
         this.simTime = settings.getInt(SIM_TIME_SETTING, SIM_TIME);
         this.invert = settings.getBoolean(INVERT_SETTING, INVERT_DEFAULT);
+        this.stable = settings.getBoolean(STABLE_SETTING, STABLE_DEFAULT);
+        if (this.stable) {
+            try {
+                String locationFileName = settings.getSetting(LOCATION_FILE_S);
+                this.stableLocation = reader.readPoints(new File(locationFileName)).get(0);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            return;
+        }
         this.schedule = settings.getCsvInts(SCHEDULE_SETTING, SCHEDULE_LEN);
         this.lectureTime = (this.simTime / SCHEDULE_LEN);
         String buildingFileName = settings.getSetting(ROUTE_FILE_S);
         String[] classroomsFilesNames = settings.getCsvSetting(CLASSROOMS_FILE_S);
-        WKTReader reader = new WKTReader();
+        String[] stableLocationsFilesNames = settings.getCsvSetting(STABLE_LOCATIONS_FILE_S);
         try {
-            polygon = reader.readLines(new File(buildingFileName)).get(0);
-            classrooms = new ArrayList<>();
+            this.polygon = reader.readLines(new File(buildingFileName)).get(0);
+            this.classrooms = new ArrayList<>();
             for (String s : classroomsFilesNames) {
-                classrooms.add(reader.readPoints(new File(s)).get(0));
+                this.classrooms.add(reader.readPoints(new File(s)).get(0));
+            }
+            this.stableLocations = new ArrayList<>();
+            for (String s : stableLocationsFilesNames) {
+                this.stableLocations.add(reader.readPoints(new File(s)).get(0));
             }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
 
     }
@@ -89,12 +113,22 @@ public class ProhibitedFMIBuilding
         // passing constructor, the rest are replicated from the prototype.
         super(other);
         // Remember to copy any state defined in this class.
-        this.invert = other.invert;
-        this.polygon = other.polygon;
-        this.schedule = other.schedule;
-        this.classrooms = other.classrooms;
         this.simTime = other.simTime;
+
+        this.invert = other.invert;
+        this.stable = other.stable;
+        this.stableLocation = other.stableLocation;
+
+        this.schedule = other.schedule;
         this.lectureTime = other.lectureTime;
+
+        this.polygon = other.polygon;
+        this.classrooms = other.classrooms;
+        this.stableLocations = other.stableLocations;
+
+        this.stableLocationGoing = other.stableLocationGoing;
+        this.stableLocationEnterTime = other.stableLocationEnterTime;
+        this.stableLocationEntered = other.stableLocationEntered;
     }
 
 
@@ -102,8 +136,42 @@ public class ProhibitedFMIBuilding
     // Implementation
     //==========================================================================//
     @Override
+    public Coord getInitialLocation() {
+        if (this.stable) {
+            this.lastWaypoint = this.stableLocation;
+        } else {
+            do {
+                this.lastWaypoint = this.randomCoord();
+            } while ((this.invert) ?
+                    isOutside(polygon, this.lastWaypoint) :
+                    isInside(this.polygon, this.lastWaypoint));
+        }
+        return this.lastWaypoint;
+    }
+
+    @Override
     public Path getPath() {
         // Creates a new path from the previous waypoint to a new one.
+        if (this.stable) {
+            Path p = new Path(0);
+            p.addWaypoint(this.lastWaypoint);
+            return p;
+        } else if (this.stableLocationTarget == this.lastWaypoint && this.stableLocationGoing) {
+            this.stableLocationGoing = false;
+            this.stableLocationEntered = true;
+            this.stableLocationEnterTime = SimClock.getIntTime();
+            Path p = new Path(0);
+            p.addWaypoint(this.lastWaypoint);
+            return p;
+        } else if (this.stableLocationEntered) {
+            if ((SimClock.getIntTime() - this.stableLocationEnterTime) <= STABLE_LOCATION_VISIT_TIME) {
+                Path p = new Path(0);
+                p.addWaypoint(this.lastWaypoint);
+                return p;
+            } else {
+                this.stableLocationEntered = false;
+            }
+        }
         final Path p;
         p = new Path(super.generateSpeed());
         p.addWaypoint(this.lastWaypoint.clone());
@@ -118,22 +186,21 @@ public class ProhibitedFMIBuilding
         int period = SimClock.getIntTime() / this.lectureTime;
         period = period == 10 ? 9 : period;
         if (schedule[period] >= 0) {
-            c = classrooms.get(schedule[period]);
-            double verMov = c.getY() - this.lastWaypoint.getY();
-            double horMov = c.getX() - this.lastWaypoint.getX();
-            boolean isFirstPass = true;
-            while (pathIntersects(this.polygon, this.lastWaypoint, c)) {
-                if (isFirstPass) {
-                    c = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
-                } else {
-                    c = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
-                }
-                isFirstPass = false;
-            }
+            System.out.println("GO TO CLASSROOM");
+            c = this.getSpecificCordWoutIntersect(classrooms.get(schedule[period]));
         } else {
-            do {
-                c = this.randomCoord();
-            } while (pathIntersects(this.polygon, this.lastWaypoint, c));
+            Random rand = new Random();
+            double rand_val = rand.nextDouble(1);
+            if (rand_val <= STABLE_LOCATION_PROBABILITY) {
+                System.out.println("GO TO STABLE LOCATION");
+                this.stableLocationTarget = stableLocations.get(rand.nextInt(stableLocations.size()));
+                this.stableLocationGoing = true;
+                c = this.getSpecificCordWoutIntersect(stableLocations.get(rand.nextInt(stableLocations.size())));
+            } else {
+                do {
+                    c = this.randomCoord();
+                } while (pathIntersects(this.polygon, this.lastWaypoint, c));
+            }
         }
         p.addWaypoint(c);
 
@@ -142,18 +209,23 @@ public class ProhibitedFMIBuilding
     }
 
     @Override
-    public Coord getInitialLocation() {
-        do {
-            this.lastWaypoint = this.randomCoord();
-        } while ((this.invert) ?
-                isOutside(polygon, this.lastWaypoint) :
-                isInside(this.polygon, this.lastWaypoint));
-        return this.lastWaypoint;
-    }
-
-    @Override
     public ProhibitedFMIBuilding replicate() {
         return new ProhibitedFMIBuilding(this);
+    }
+
+    private Coord getSpecificCordWoutIntersect(Coord c) {
+        double verMov = c.getY() - this.lastWaypoint.getY();
+        double horMov = c.getX() - this.lastWaypoint.getX();
+        boolean isFirstPass = true;
+        while (pathIntersects(this.polygon, this.lastWaypoint, c)) {
+            if (isFirstPass) {
+                c = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
+            } else {
+                c = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
+            }
+            isFirstPass = false;
+        }
+        return c;
     }
 
     private Coord randomCoord() {
