@@ -5,11 +5,13 @@
 package routing;
 
 import core.*;
+import java.util.Random;
 
 public class VirusRouter extends ActiveRouter {
 
     private boolean hasSmallVirus = false;
     private boolean hasBigVirus = false;
+    private boolean wc = false;
 
     public VirusRouter(Settings s) {
         super(s);
@@ -19,6 +21,7 @@ public class VirusRouter extends ActiveRouter {
         super(r);
         this.hasSmallVirus = r.isHasSmallVirus();
         this.hasBigVirus = r.isHasBigVirus();
+        this.wc = r.isWc();
     }
 
     public boolean isHasSmallVirus() {
@@ -35,6 +38,14 @@ public class VirusRouter extends ActiveRouter {
 
     public void setHasBigVirus(boolean hasBigVirus) {
         this.hasBigVirus = hasBigVirus;
+    }
+
+    public boolean isWc() {
+        return wc;
+    }
+
+    public void setWc(boolean wc) {
+        this.wc = wc;
     }
 
     @Override
@@ -60,7 +71,6 @@ public class VirusRouter extends ActiveRouter {
 
     @Override
     public boolean createNewMessage(Message m) {
-        System.out.println("Created virus: " + m);
         String virusType = m.toString().substring(0, Math.min(m.toString().length(), 2));
 
         if(virusType.equals("LV")){
@@ -85,12 +95,23 @@ public class VirusRouter extends ActiveRouter {
             if (this.isHasBigVirus()){
                 return m;
             }
+
             if(this.isHasSmallVirus()) {
                 virusInfectedProbability = virusInfectedProbability * 0.7F;
             } else {
                 virusInfectedProbability = virusInfectedProbability * 0.5F;
             }
-            this.setHasBigVirus(true);
+
+            Random random = new Random();
+            float infectProbability = 0.0F + random.nextFloat() * (virusInfectedProbability);
+            if(((VirusRouter) from.getRouter()).isWc()){
+                infectProbability += 20.F;
+                System.out.println("We are : " +  this.getHost().toString() + "From host: " + from.toString() + " infectProbability: " + infectProbability);
+            }
+
+            if(infectProbability > 30.0F){
+                this.setHasBigVirus(true);
+            }
         } else if (((VirusRouter) from.getRouter()).isHasSmallVirus() && virusType.equals("SV")) {
             this.setHasSmallVirus(true);
         }

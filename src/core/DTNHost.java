@@ -7,6 +7,7 @@ package core;
 import movement.MovementModel;
 import movement.Path;
 import routing.MessageRouter;
+import routing.VirusRouter;
 import routing.util.RoutingInfo;
 
 import java.util.ArrayList;
@@ -31,8 +32,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	private double speed;
 	private double nextTimeToMove;
 	public final String groupId;
-
 	private String name;
+	private String wc;
 	private List<MessageListener> msgListeners;
 	private List<MovementListener> movListeners;
 	private List<NetworkInterface> net;
@@ -56,7 +57,7 @@ public class DTNHost implements Comparable<DTNHost> {
                    List<MovementListener> movLs,
                    String groupId, List<NetworkInterface> interf,
                    ModuleCommunicationBus comBus,
-                   MovementModel mmProto, MessageRouter mRouterProto) {
+                   MovementModel mmProto, MessageRouter mRouterProto, String wc) {
 		this.comBus = comBus;
 		this.location = new Coord(0,0);
 		this.address = getNextAddress();
@@ -80,6 +81,8 @@ public class DTNHost implements Comparable<DTNHost> {
 		this.movement = mmProto.replicate();
 		this.movement.setComBus(comBus);
 		this.movement.setHost(this);
+
+		this.wc = wc;
 		setRouter(mRouterProto.replicate());
 
 		this.location = movement.getInitialLocation();
@@ -137,6 +140,12 @@ public class DTNHost implements Comparable<DTNHost> {
 	private void setRouter(MessageRouter router) {
 		router.init(this, msgListeners);
 		this.router = router;
+
+		if(wc.equals("true")){
+			((VirusRouter) this.router).setWc(true);
+		} else{
+			((VirusRouter) this.router).setWc(false);
+		}
 	}
 
 	public String getName() {

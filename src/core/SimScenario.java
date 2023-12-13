@@ -82,6 +82,9 @@ public class SimScenario implements Serializable {
 	/** package where to look for application classes */
 	private static final String APP_PACKAGE = "applications.";
 
+	/** WC value */
+	private static final String WC = "wc";
+
 	/** The world instance */
 	private World world;
 	/** List of hosts in this simulation */
@@ -339,6 +342,8 @@ public class SimScenario implements Serializable {
 				(MessageRouter)s.createIntializedObject(ROUTING_PACKAGE +
 						s.getSetting(ROUTER_S));
 
+			String wc = s.getSetting(WC);
+
 			/* checks that these values are positive (throws Error if not) */
 			s.ensurePositiveValue(nrofHosts, NROF_HOSTS_S);
 			s.ensurePositiveValue(nrofInterfaces, NROF_INTERF_S);
@@ -397,7 +402,7 @@ public class SimScenario implements Serializable {
 				// new instances of movement model and message router
 				DTNHost host = new DTNHost(this.messageListeners,
 						this.movementListeners,	gid, interfaces, comBus,
-						mmProto, mRouterProto);
+						mmProto, mRouterProto, wc);
 				hosts.add(host);
 			}
 		}
