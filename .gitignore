@@ -17,3 +17,4 @@ doc/package-list
 .settings/org.eclipse.*
 
 .idea/
+*.iml
