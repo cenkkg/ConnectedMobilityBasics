@@ -8,13 +8,15 @@ import core.*;
 import java.util.Random;
 
 public class VirusRouter extends ActiveRouter {
-
+    public static final String WC_SETTING = "wc";
+    public static final boolean WC_DEFAULT = false;
     private boolean hasSmallVirus = false;
     private boolean hasBigVirus = false;
     private boolean wc = false;
 
     public VirusRouter(Settings s) {
         super(s);
+        this.wc = s.getBoolean(WC_SETTING, WC_DEFAULT);
     }
 
     protected VirusRouter(VirusRouter r) {
