@@ -1,0 +1,101 @@
+## Settings that define ProhibitedPolygonRwp movement with one group of nodes.
+
+Scenario.name = MapRouteMovement
+Scenario.endTime = 30k
+Scenario.updateInterval = 0.1
+Scenario.simulateConnections = false
+MovementModel.worldSize = 8000,4000
+
+myInterface.type = SimpleBroadcastInterface
+myInterface.transmitRange = 10
+myInterface.transmitSpeed = 450000k
+
+# ========================================================
+
+# Group.router = VirusRouter
+Group.msgTtl = 200
+Group.bufferSize = 50
+Group.waitTime = 0, 120
+Group.nrofInterfaces = 1
+
+Scenario.nrofHostGroups = 3
+Group.routeFile = data/fmi/fmi_building.wkt
+Group.classroomsFiles = data/fmi/classroom/fmi_classroom1.wkt, data/fmi/classroom/fmi_classroom2.wkt, data/fmi/classroom/fmi_classroom3.wkt, data/fmi/classroom/fmi_classroom4.wkt, data/fmi/classroom/fmi_classroom5.wkt
+Group.stableLocationsFiles = data/fmi/toilet/fmi_toilet1.wkt
+Group.rwpInvert = true
+
+Group1.groupID = x
+Group1.nrofHosts = 10
+Group1.nrofInterfaces = 1
+Group1.interface1 = myInterface
+Group1.movementModel = ProhibitedFMIBuilding
+Group1.router = VirusRouter
+Group1.wc = false
+Group1.routeType = 1
+Group1.schedule = -1, 1, -1, 2, 0, 4, -1, 1, 3, 0
+
+Group2.groupID = y
+Group2.nrofHosts = 7
+Group2.nrofInterfaces = 1
+Group2.interface1 = myInterface
+Group2.movementModel = ProhibitedFMIBuilding
+Group2.router = VirusRouter
+Group2.wc = false
+Group2.routeType = 1
+Group2.schedule = -1, 0, -1, 1, 0, 3, -1, 2, 1, 0
+
+Group3.groupID = toilet
+Group3.nrofHosts = 1
+Group3.nrofInterfaces = 1
+Group3.interface1 = myInterface
+Group3.movementModel = ProhibitedFMIBuilding
+Group3.router = VirusRouter
+Group2.wc = true
+Group3.routeType = 1
+Group3.stable = true
+Group3.locationFile = data/fmi/toilet/fmi_toilet1.wkt
+
+## Map based movement -movement model specific settings
+MapBasedMovement.nrofMapFiles = 1
+MapBasedMovement.mapFile1 = data/fmi/fmi_building.wkt
+
+
+# ========================================================
+
+Report.nrofReports = 0
+Report.reportDir = reports
+
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+
+Events.nrof = 30
+
+Events1.class = SingleMessageGenerator
+Events1.interval = 5, 11
+Events1.size = 1
+Events1.hosts = 5, 11
+Events1.tohosts = 0, 17
+Events1.prefix = LV
+
+Events2.class = SingleMessageGenerator
+Events2.interval = 1, 4
+Events2.size = 1
+Events2.hosts = 1, 4
+Events2.tohosts = 0, 17
+Events2.prefix = SV
+
+
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+
+Optimization.connectionAlg = 2
+Optimization.cellSizeMult = 5
+Optimization.randomizeUpdateOrder = true
+
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+
+GUI.UnderlayImage.offset = 64, 20
+GUI.UnderlayImage.scale = 4.75
+GUI.UnderlayImage.rotate = -0.015
+GUI.EventLogPanel.nrofEvents = 30
