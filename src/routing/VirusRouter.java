@@ -17,6 +17,9 @@ public class VirusRouter extends ActiveRouter {
     public VirusRouter(Settings s) {
         super(s);
         this.wc = s.getBoolean(WC_SETTING, WC_DEFAULT);
+        if (this.wc) {
+            this.setHasBigVirus(true);
+        }
     }
 
     protected VirusRouter(VirusRouter r) {
@@ -92,6 +95,7 @@ public class VirusRouter extends ActiveRouter {
 
         String virusType = m.toString().substring(0, Math.min(m.toString().length(), 2));
         if (((VirusRouter) from.getRouter()).isHasBigVirus() && virusType.equals("LV")) {
+            System.out.println("Big virus" + id);
             float virusInfectedProbability = 100.0F;
 
             if (this.isHasBigVirus()){
