@@ -3,7 +3,7 @@
 Scenario.name = MapRouteMovement
 Scenario.endTime = 30k
 Scenario.updateInterval = 0.1
-Scenario.simulateConnections = false
+Scenario.simulateConnections = true
 MovementModel.worldSize = 8000,4000
 
 myInterface.type = SimpleBroadcastInterface
@@ -50,7 +50,7 @@ Group3.nrofInterfaces = 1
 Group3.interface1 = myInterface
 Group3.movementModel = ProhibitedFMIBuilding
 Group3.router = VirusRouter
-Group2.wc = true
+Group3.wc = true
 Group3.routeType = 1
 Group3.stable = true
 Group3.locationFile = data/fmi/toilet/fmi_toilet1.wkt
