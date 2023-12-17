@@ -17,9 +17,6 @@ public class VirusRouter extends ActiveRouter {
     public VirusRouter(Settings s) {
         super(s);
         this.wc = s.getBoolean(WC_SETTING, WC_DEFAULT);
-        if (this.wc) {
-            this.setHasBigVirus(true);
-        }
     }
 
     protected VirusRouter(VirusRouter r) {
@@ -56,15 +53,6 @@ public class VirusRouter extends ActiveRouter {
     @Override
     public void update() {
         super.update();
-//		if (isTransferring() || !canStartTransfer()) {
-//			return; // transferring, don't try other connections yet
-//		}
-//
-//		// Try first the messages that can be delivered to final recipient
-//		if (exchangeDeliverableMessages() != null) {
-//			return; // started a transfer, don't try others (yet)
-//		}
-
         // then try any/all message to any/all connection
         this.tryAllMessagesToAllConnections();
     }
@@ -92,34 +80,30 @@ public class VirusRouter extends ActiveRouter {
     @Override
     public Message messageTransferred(String id, DTNHost from) {
         Message m = super.messageTransferred(id, from);
-
         String virusType = m.toString().substring(0, Math.min(m.toString().length(), 2));
         if (((VirusRouter) from.getRouter()).isHasBigVirus() && virusType.equals("LV")) {
-            System.out.println("Big virus" + id);
             float virusInfectedProbability = 100.0F;
 
-            if (this.isHasBigVirus()){
-                return m;
-            }
+            if (!this.isHasBigVirus()){
+                if(this.isHasSmallVirus()) {
+                    virusInfectedProbability = virusInfectedProbability * 0.7F;
+                } else {
+                    virusInfectedProbability = virusInfectedProbability * 0.5F;
+                }
+                Random random = new Random();
+                float infectProbability = 0.0F + random.nextFloat() * (virusInfectedProbability);
+                if(((VirusRouter) from.getRouter()).isWc()){
+                    infectProbability += 20.F;
+                }
 
-            if(this.isHasSmallVirus()) {
-                virusInfectedProbability = virusInfectedProbability * 0.7F;
-            } else {
-                virusInfectedProbability = virusInfectedProbability * 0.5F;
+                if(infectProbability > 30.0F){
+                    this.setHasBigVirus(true);
+                }
             }
-
-            Random random = new Random();
-            float infectProbability = 0.0F + random.nextFloat() * (virusInfectedProbability);
-            if(((VirusRouter) from.getRouter()).isWc()){
-                infectProbability += 20.F;
-                System.out.println("We are : " +  this.getHost().toString() + "From host: " + from.toString() + " infectProbability: " + infectProbability);
-            }
-
-            if(infectProbability > 30.0F){
-                this.setHasBigVirus(true);
-            }
-        } else if (((VirusRouter) from.getRouter()).isHasSmallVirus() && virusType.equals("SV")) {
+        }
+        if (((VirusRouter) from.getRouter()).isHasSmallVirus() && virusType.equals("SV")) {
             this.setHasSmallVirus(true);
+            System.out.println("virusType = " + virusType);
         }
         return m;
     }

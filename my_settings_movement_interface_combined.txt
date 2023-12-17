@@ -62,8 +62,10 @@ MapBasedMovement.mapFile1 = data/fmi/fmi_building.wkt
 
 # ========================================================
 
-Report.nrofReports = 0
-Report.reportDir = reports
+Report.nrofReports = 1
+Report.warmup = 0
+Report.reportDir = reports/
+Report.report1 = MessageStatsReport
 
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------

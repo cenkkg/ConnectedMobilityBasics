@@ -12,6 +12,7 @@ import java.util.Map;
 import core.DTNHost;
 import core.Message;
 import core.MessageListener;
+import routing.VirusRouter;
 
 /**
  * Report for generating different kind of total statistics about message
@@ -37,6 +38,10 @@ public class MessageStatsReport extends Report implements MessageListener {
 	private int nrofResponseReqCreated;
 	private int nrofResponseDelivered;
 	private int nrofDelivered;
+	private int bigVirusTransferred;
+	private int smallVirusTransferred;
+	private int bigVirusTransferredFromWC;
+	private int smallVirusTransferredFromWC;
 
 	/**
 	 * Constructor.
@@ -63,6 +68,10 @@ public class MessageStatsReport extends Report implements MessageListener {
 		this.nrofResponseReqCreated = 0;
 		this.nrofResponseDelivered = 0;
 		this.nrofDelivered = 0;
+		this.bigVirusTransferred = 0;
+		this.smallVirusTransferred = 0;
+		this.bigVirusTransferredFromWC = 0;
+		this.smallVirusTransferredFromWC = 0;
 	}
 
 
@@ -108,6 +117,18 @@ public class MessageStatsReport extends Report implements MessageListener {
 				this.rtt.add(getSimTime() -	m.getRequest().getCreationTime());
 				this.nrofResponseDelivered++;
 			}
+		}
+		if (((VirusRouter) from.getRouter()).isHasBigVirus()) {
+			this.bigVirusTransferred++;
+		}
+		if (((VirusRouter) from.getRouter()).isHasSmallVirus()) {
+			this.smallVirusTransferred++;
+		}
+		if (((VirusRouter) from.getRouter()).isHasBigVirus() && ((VirusRouter) from.getRouter()).isWc()) {
+			this.bigVirusTransferredFromWC++;
+		}
+		else if (((VirusRouter) from.getRouter()).isHasSmallVirus() && ((VirusRouter) from.getRouter()).isWc()) {
+			this.smallVirusTransferredFromWC++;
 		}
 	}
 
@@ -172,7 +193,11 @@ public class MessageStatsReport extends Report implements MessageListener {
 			"\nbuffertime_avg: " + getAverage(this.msgBufferTime) +
 			"\nbuffertime_med: " + getMedian(this.msgBufferTime) +
 			"\nrtt_avg: " + getAverage(this.rtt) +
-			"\nrtt_med: " + getMedian(this.rtt)
+			"\nrtt_med: " + getMedian(this.rtt) +
+			"\nbig_virus_transferred: " + this.bigVirusTransferred +
+			"\nsmall_virus_transferred: " + this.smallVirusTransferred +
+			"\nbig_virus_transferred_from_wc: " + this.bigVirusTransferredFromWC +
+			"\nsmall_virus_transferred_from_wc: " + this.smallVirusTransferredFromWC
 			;
 
 		write(statsText);
