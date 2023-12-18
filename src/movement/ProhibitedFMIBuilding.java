@@ -216,24 +216,21 @@ public class ProhibitedFMIBuilding
     private Coord getSpecificCordWoutIntersect(Coord c) {
         double verMov = c.getY() - this.lastWaypoint.getY();
         double horMov = c.getX() - this.lastWaypoint.getX();
-        boolean isFirstPass = true;
-        boolean isLastPass = false;
-        Coord newC = null;
-        while (pathIntersects(this.polygon, this.lastWaypoint, c) && !isLastPass) {
-            if (isFirstPass) {
-                newC = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
-            } else {
-                newC = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
-                isLastPass = true;
+        Coord newC = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY() + verMov);
+        if (!pathIntersects(this.polygon, this.lastWaypoint, newC)) {
+            return newC;
+        } else {
+            newC = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
+            if (!pathIntersects(this.polygon, this.lastWaypoint, newC)) {
+                return newC;
             }
-            isFirstPass = false;
+            newC = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
+            if (!pathIntersects(this.polygon, this.lastWaypoint, newC)) {
+                return newC;
+            }
         }
-        if(newC == null) {
-            final double midX = 3350.0;
-            final double midY = 1150.0;
-            newC =  new Coord((midX + this.lastWaypoint.getX())/2, (midY + this.lastWaypoint.getY())/2);
-        }
-        return newC;
+        System.out.println("escape");
+        return new Coord((horMov + this.lastWaypoint.getX())/10, (verMov + this.lastWaypoint.getY())/10);
     }
 
     private Coord randomCoord() {
