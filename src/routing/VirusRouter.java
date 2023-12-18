@@ -103,7 +103,7 @@ public class VirusRouter extends ActiveRouter {
         }
         if (((VirusRouter) from.getRouter()).isHasSmallVirus() && virusType.equals("SV")) {
             this.setHasSmallVirus(true);
-            System.out.println("virusType = " + virusType);
+            // System.out.println("virusType = " + virusType);
         }
         return m;
     }

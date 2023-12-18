@@ -18,31 +18,33 @@ Group.bufferSize = 50
 Group.waitTime = 0, 120
 Group.nrofInterfaces = 1
 
-Scenario.nrofHostGroups = 3
+Scenario.nrofHostGroups = 10
 Group.routeFile = data/fmi/fmi_building.wkt
-Group.classroomsFiles = data/fmi/classroom/fmi_classroom1.wkt, data/fmi/classroom/fmi_classroom2.wkt, data/fmi/classroom/fmi_classroom3.wkt, data/fmi/classroom/fmi_classroom4.wkt, data/fmi/classroom/fmi_classroom5.wkt
-Group.stableLocationsFiles = data/fmi/toilet/fmi_toilet1.wkt
+Group.classroomsFiles = data/fmi/classroom/fmi_classroom1.wkt, data/fmi/classroom/fmi_classroom2.wkt, data/fmi/classroom/fmi_classroom3.wkt, data/fmi/classroom/fmi_classroom4.wkt, data/fmi/classroom/fmi_classroom5.wkt, data/fmi/classroom/fmi_classroom6.wkt, data/fmi/classroom/fmi_classroom7.wkt, data/fmi/classroom/fmi_classroom8.wkt
+Group.stableLocationsFiles = data/fmi/toilet/fmi_toilet1.wkt, data/fmi/toilet/fmi_toilet2.wkt, data/fmi/toilet/fmi_toilet3.wkt, data/fmi/toilet/fmi_toilet4.wkt, data/fmi/toilet/fmi_toilet5.wkt, data/fmi/canteen/fmi_canteen.wkt
 Group.rwpInvert = true
 
-Group1.groupID = x
-Group1.nrofHosts = 10
+Group1.groupID = toilet
+Group1.nrofHosts = 1
 Group1.nrofInterfaces = 1
 Group1.interface1 = myInterface
 Group1.movementModel = ProhibitedFMIBuilding
 Group1.router = VirusRouter
-Group1.wc = false
+Group1.wc = true
 Group1.routeType = 1
-Group1.schedule = -1, 1, -1, 2, 0, 4, -1, 1, 3, 0
+Group1.stable = true
+Group1.locationFile = data/fmi/toilet/fmi_toilet1.wkt
 
-Group2.groupID = y
-Group2.nrofHosts = 7
+Group2.groupID = toilet
+Group2.nrofHosts = 1
 Group2.nrofInterfaces = 1
 Group2.interface1 = myInterface
 Group2.movementModel = ProhibitedFMIBuilding
 Group2.router = VirusRouter
-Group2.wc = false
+Group2.wc = true
 Group2.routeType = 1
-Group2.schedule = -1, 0, -1, 1, 0, 3, -1, 2, 1, 0
+Group2.stable = true
+Group2.locationFile = data/fmi/toilet/fmi_toilet2.wkt
 
 Group3.groupID = toilet
 Group3.nrofHosts = 1
@@ -53,7 +55,80 @@ Group3.router = VirusRouter
 Group3.wc = true
 Group3.routeType = 1
 Group3.stable = true
-Group3.locationFile = data/fmi/toilet/fmi_toilet1.wkt
+Group3.locationFile = data/fmi/toilet/fmi_toilet3.wkt
+
+Group4.groupID = toilet
+Group4.nrofHosts = 1
+Group4.nrofInterfaces = 1
+Group4.interface1 = myInterface
+Group4.movementModel = ProhibitedFMIBuilding
+Group4.router = VirusRouter
+Group4.wc = true
+Group4.routeType = 1
+Group4.stable = true
+Group4.locationFile = data/fmi/toilet/fmi_toilet4.wkt
+
+Group5.groupID = toilet
+Group5.nrofHosts = 1
+Group5.nrofInterfaces = 1
+Group5.interface1 = myInterface
+Group5.movementModel = ProhibitedFMIBuilding
+Group5.router = VirusRouter
+Group5.wc = true
+Group5.routeType = 1
+Group5.stable = true
+Group5.locationFile = data/fmi/toilet/fmi_toilet5.wkt
+
+Group6.groupID = canteen
+Group.nrofHosts = 1
+Group6.nrofInterfaces = 1
+Group6.interface1 = myInterface
+Group6.movementModel = ProhibitedFMIBuilding
+Group6.router = VirusRouter
+Group6.wc = true
+Group6.routeType = 1
+Group6.stable = true
+Group6.locationFile = data/fmi/canteen/fmi_canteen.wkt
+
+Group7.groupID = x
+Group7.nrofHosts = 10
+Group7.nrofInterfaces = 1
+Group7.interface1 = myInterface
+Group7.movementModel = ProhibitedFMIBuilding
+Group7.router = VirusRouter
+Group7.wc = false
+Group7.routeType = 1
+Group7.schedule = -1, 1, 4, -1, 0, 4, -1, 3, 2, -1
+
+Group8.groupID = y
+Group8.nrofHosts = 7
+Group8.nrofInterfaces = 1
+Group8.interface1 = myInterface
+Group8.movementModel = ProhibitedFMIBuilding
+Group8.router = VirusRouter
+Group8.wc = false
+Group8.routeType = 1
+Group8.schedule = -1, 0, -1, 1, 2, 3, 5, -1, -1, 0
+
+Group9.groupID = z
+Group9.nrofHosts = 8
+Group9.nrofInterfaces = 1
+Group9.interface1 = myInterface
+Group9.movementModel = ProhibitedFMIBuilding
+Group9.router = VirusRouter
+Group9.wc = false
+Group9.routeType = 1
+Group9.schedule = -1, 7, 5, 6, 4, -1, -1, -1, 1, -1
+
+Group10.groupID = a
+Group10.nrofHosts = 12
+Group10.nrofInterfaces = 1
+Group10.interface1 = myInterface
+Group10.movementModel = ProhibitedFMIBuilding
+Group10.router = VirusRouter
+Group10.wc = false
+Group10.routeType = 1
+Group10.schedule = -1, 3, -1, -1, -1, 7, 2, -1, 5, -1
 
 ## Map based movement -movement model specific settings
 MapBasedMovement.nrofMapFiles = 1

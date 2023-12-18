@@ -186,13 +186,13 @@ public class ProhibitedFMIBuilding
         int period = SimClock.getIntTime() / this.lectureTime;
         period = period == 10 ? 9 : period;
         if (schedule[period] >= 0) {
-            System.out.println("GO TO CLASSROOM");
+            // System.out.println("GO TO CLASSROOM");
             c = this.getSpecificCordWoutIntersect(classrooms.get(schedule[period]));
         } else {
             Random rand = new Random();
             double rand_val = rand.nextDouble(1);
             if (rand_val <= STABLE_LOCATION_PROBABILITY) {
-                System.out.println("GO TO STABLE LOCATION");
+                // System.out.println("GO TO STABLE LOCATION");
                 this.stableLocationTarget = stableLocations.get(rand.nextInt(stableLocations.size()));
                 this.stableLocationGoing = true;
                 c = this.getSpecificCordWoutIntersect(stableLocations.get(rand.nextInt(stableLocations.size())));
@@ -217,15 +217,23 @@ public class ProhibitedFMIBuilding
         double verMov = c.getY() - this.lastWaypoint.getY();
         double horMov = c.getX() - this.lastWaypoint.getX();
         boolean isFirstPass = true;
-        while (pathIntersects(this.polygon, this.lastWaypoint, c)) {
+        boolean isLastPass = false;
+        Coord newC = null;
+        while (pathIntersects(this.polygon, this.lastWaypoint, c) && !isLastPass) {
             if (isFirstPass) {
-                c = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
+                newC = new Coord(this.lastWaypoint.getX() + horMov, this.lastWaypoint.getY());
             } else {
-                c = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
+                newC = new Coord(this.lastWaypoint.getX(), this.lastWaypoint.getY() + verMov);
+                isLastPass = true;
             }
             isFirstPass = false;
         }
-        return c;
+        if(newC == null) {
+            final double midX = 3350.0;
+            final double midY = 1150.0;
+            newC =  new Coord((midX + this.lastWaypoint.getX())/2, (midY + this.lastWaypoint.getY())/2);
+        }
+        return newC;
     }
 
     private Coord randomCoord() {
