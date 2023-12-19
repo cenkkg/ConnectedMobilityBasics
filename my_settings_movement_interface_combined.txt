@@ -1,6 +1,6 @@
 ## Settings that define ProhibitedPolygonRwp movement with one group of nodes.
 
-Scenario.name = MapRouteMovement
+Scenario.name = FMI_Virus_Spread
 Scenario.endTime = 30k
 Scenario.updateInterval = 0.1
 Scenario.simulateConnections = true
