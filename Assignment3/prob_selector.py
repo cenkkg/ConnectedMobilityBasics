@@ -1,21 +1,23 @@
 import json
 import jmespath
 
-PROBES = {'home': [], 'lte': [], 'starlink': [], 'wlan': []}
-PROBE_TYPES = ['home', 'lte', 'starlink', 'wlan']
 
-def probe_selector(probe_type):
-    with open('probes.json', 'r') as file:
-        probe_data = json.load(file)
-        jmespath.search('objects[*][].age', probe_data)
-
-
+probe_dict = {
+    'home': './home_probes.json',
+    'lte': './lte_probes.json',
+    'starlink': './starlink_probes.json',
+    'wlan': './wlan_probes.json'
+}
 
 
+def probe_selector():
+    with open('./probes.json', 'r') as r_file:
+        probe_data = json.load(r_file)
+        for k, v in probe_dict.items():
+            filtered_probes = jmespath.search(f"objects[?contains(tags, '{k}') && status_name == 'Connected']", probe_data)
+            with open(v, 'w') as w_file:
+                w_file.write(json.dumps(filtered_probes))
 
 
-
-        # number_of_probes = len(all_probes)
-        # while True:
-        #     probe_index = random.randint(0, number_of_probes)
-        #     if all_probes[probe_index]['status_name'] == 'Connected' and  all_probes[probe_index]['status_name']
+if __name__ == "__main__":
+    probe_selector()
