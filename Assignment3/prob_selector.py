@@ -1,7 +1,8 @@
 import csv
 import json
 import random
-
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 import jmespath
 
 probe_dict = {
@@ -47,6 +48,19 @@ def probe_selector():
             filtered_probes = jmespath.search(f"objects[?({v['query']}) "
                                               f"&& status_name == 'Connected' && status == to_number('1')]",
                                               probe_data)
+            filtered_probes_lat = jmespath.search(f"objects[?({v['query']}) "
+                                                  f"&& status_name == 'Connected' && status == to_number('1')].latitude",
+                                                  probe_data)
+            filtered_probes_long = jmespath.search(f"objects[?({v['query']}) "
+                                                   f"&& status_name == 'Connected' && status == to_number("
+                                                   f"'1')].longitude",
+                                                   probe_data)
+            cord = list(zip(filtered_probes_long, filtered_probes_lat))
+            kmeans = KMeans(n_clusters=20)
+            kmeans.fit(cord)
+            plt.scatter(filtered_probes_long, filtered_probes_lat, c=kmeans.labels_)
+            plt.title(k)
+            plt.show()
             with open(v['file_json'], 'w') as w_file:
                 w_file.write(json.dumps(filtered_probes))
             n_no_probes = []
