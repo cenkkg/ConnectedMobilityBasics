@@ -10,15 +10,22 @@ probe_dict = {
         'query': "contains(tags, 'home') && "
                  "(contains(tags, 'wi-fi') || contains(tags, 'wifi') || "
                  "contains(tags, 'wlan') || contains(tags, 'wireless') || "
-                 "contains(tags, 'wireless-link'))",
+                 "contains(tags, 'wireless-link')) && "
+                 "!(contains(tags, 'lte') || contains(tags, '5g') || "
+                 "contains(tags, '4g') || contains(tags, '3g') || "
+                 "contains(tags, 'cellular'))",
         'file_json': "./wifi_home_probes.json",
         'file_100_json': "./wifi_home_probes_{}.json",
         'file_100_csv': "./wifi_home_probes_ids_{}.csv"
     },
     'lte': {
-        'query': "contains(tags, 'lte') || contains(tags, '5g') || "
+        'query': "(contains(tags, 'lte') || contains(tags, '5g') || "
                  "contains(tags, '4g') || contains(tags, '3g') || "
-                 "contains(tags, 'cellular')",
+                 "contains(tags, 'cellular')) && "
+                 "!(contains(tags, 'wi-fi') || contains(tags, 'wifi') || "
+                 "contains(tags, 'wlan') || contains(tags, 'wireless') || "
+                 "contains(tags, 'wireless-link') || contains(tags, 'home') || "
+                 "contains(tags, 'fibre'))",
         'file_json': "./lte_probes.json",
         'file_100_json': "./lte_probes_{}.json",
         'file_100_csv': "./lte_probes_ids_{}.csv"
@@ -33,7 +40,10 @@ probe_dict = {
         'query': "contains(tags, 'home') && "
                  "(contains(tags, 'dsl') || contains(tags, 'adsl') || "
                  "contains(tags, 'fibre') || contains(tags, 'fiber') || "
-                 "contains(tags, 'cable'))",
+                 "contains(tags, 'cable')) && "
+                 "!(contains(tags, 'lte') || contains(tags, '5g') || "
+                 "contains(tags, '4g') || contains(tags, '3g') ||"
+                 "contains(tags, 'cellular'))",
         'file_json': "./ethernet_probes.json",
         'file_100_json': "./ethernet_probes_{}.json",
         'file_100_csv': "./ethernet_probes_ids_{}.csv"
@@ -101,6 +111,33 @@ def probe_selector():
             selected_probes_long = [pr['longitude'] for pr in n_no_probes]
             selected_probes_lat = [pr['latitude'] for pr in n_no_probes]
             plt.scatter(selected_probes_long, selected_probes_lat)
+            # for i, txt in enumerate(n_no_probes_ids):
+            #     plt.annotate(txt, (selected_probes_long[i], selected_probes_lat[i]), color='r')
+
+            datacenter_locations = [[-78, 39, '52.46.142.78'], [-121, 37, '176.32.118.30'], [-121, 44, '52.94.214.88'],
+                                    [114.1577, 22.2855, '13.248.36.100'], [72.8774, 19.0760, '52.95.84.21'],
+                                    [135.5022, 34.6942, '13.248.4.70'], [18.4229, -33.9256, '99.78.128.100'],
+                                    [-46.6372, -23.5471, '177.72.245.178'], [-6.2672, 53.3442, '52.95.127.226'],
+                                    [151.2070, -33.8678, '103.8.174.238'], [-0.1257, 51.5085, '8.208.40.164'],
+                                    [55.3047, 25.2585, '47.91.99.18'], [151.2070, -33.8678, '47.74.79.155'],
+                                    [103.8503, 1.2900, '161.117.155.93'],
+                                    [8.6820, 50.1109, '47.254.186.91'], [-118.2439, 34.0526, '47.88.111.29'],
+                                    [-122.2348, 47.3809, '108.61.194.105'], [-80.2364, 25.8118, '104.156.244.232'],
+                                    [-46.6372, -23.5471, '216.238.98.118'], [2.3843, 48.9165, '108.61.209.127'],
+                                    [103.8503, 1.2900, '45.32.100.168'], [151.2003, -33.9022, '108.61.212.117'],
+                                    [-84.3875, 33.7488, '192.155.94.157'], [-96.7298, 32.9483, ',50.116.25.154'],
+                                    [8.6820, 50.1109, '139.162.130.8'], [151.2070, -33.8678, '172.105.174.7'],
+                                    [121.5636, 25.0382, '152.32.231.6'], [3.3958, 6.4530, '23.248.185.157'],
+                                    [55.3047, 25.2585, '23.248.184.34'], [121.4689, 31.2243, '117.50.123.23'],
+                                    [151.2070, -33.8678, '134.70.92.3'], [-46.6372, -23.5471, '134.70.84.3'],
+                                    [139.6923, 35.6895, '134.70.80.3'], [8.5498, 47.3668, '134.70.88.3'],
+                                    [-73.5878, 45.5088, '134.70.116.1'], [28.0436, -26.2022, '134.70.160.1']]
+            datacenter_long = [el[0] for el in datacenter_locations]
+            datacenter_lat = [el[1] for el in datacenter_locations]
+            datacenter_ips = [el[2] for el in datacenter_locations]
+            plt.scatter(datacenter_long, datacenter_lat)
+            for i, txt in enumerate(datacenter_ips):
+                plt.annotate(txt, (datacenter_long[i], datacenter_lat[i]))
             plt.title("selected " + probe_dict_k)
             plt.show()
             print(probe_dict_k)
