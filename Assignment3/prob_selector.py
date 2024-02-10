@@ -24,7 +24,7 @@ probe_dict = {
         'file_100_csv': "./lte_probes_ids_{}.csv"
     },
     'sat': {
-        'query': "asn_v4 == to_number('14593')",
+        'query': "asn_v4 == to_number('14593') && contains(tags, 'starlink')",
         'file_json': "./sat_probes.json",
         'file_100_json': "./sat_probes_{}.json",
         'file_100_csv': "./sat_probes_ids_{}.csv"
