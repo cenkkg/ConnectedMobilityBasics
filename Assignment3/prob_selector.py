@@ -13,7 +13,10 @@ probe_dict = {
                  "contains(tags, 'wireless-link')) && "
                  "!(contains(tags, 'lte') || contains(tags, '5g') || "
                  "contains(tags, '4g') || contains(tags, '3g') || "
-                 "contains(tags, 'cellular'))",
+                 "contains(tags, 'cellular')) && "
+                 "!(contains(tags, 'dsl') || contains(tags, 'adsl') || "
+                 "contains(tags, 'fibre') || contains(tags, 'fiber') || "
+                 "contains(tags, 'cable'))",
         'file_json': "./wifi_home_probes.json",
         'file_100_json': "./wifi_home_probes_{}.json",
         'file_100_csv': "./wifi_home_probes_ids_{}.csv"
@@ -43,7 +46,10 @@ probe_dict = {
                  "contains(tags, 'cable')) && "
                  "!(contains(tags, 'lte') || contains(tags, '5g') || "
                  "contains(tags, '4g') || contains(tags, '3g') ||"
-                 "contains(tags, 'cellular'))",
+                 "contains(tags, 'cellular')) && "
+                 "!(contains(tags, 'wi-fi') || contains(tags, 'wifi') || "
+                 "contains(tags, 'wlan') || contains(tags, 'wireless') || "
+                 "contains(tags, 'wireless-link'))",
         'file_json': "./ethernet_probes.json",
         'file_100_json': "./ethernet_probes_{}.json",
         'file_100_csv': "./ethernet_probes_ids_{}.csv"
@@ -63,12 +69,12 @@ def probe_selector():
             filtered_probes_long = [p['longitude'] for p in filtered_probes]
             filtered_probes_lat = [p['latitude'] for p in filtered_probes]
             cord = list(zip(filtered_probes_long, filtered_probes_lat))
-            kmeans = KMeans(n_clusters=25)
+            kmeans = KMeans(n_clusters=min(25, len(filtered_probes_lat)))
             kmeans.fit(cord)
             # display cluster plots
-            plt.scatter(filtered_probes_long, filtered_probes_lat, c=kmeans.labels_)
-            plt.title(probe_dict_k)
-            plt.show()
+            # plt.scatter(filtered_probes_long, filtered_probes_lat, c=kmeans.labels_)
+            # plt.title(probe_dict_k)
+            # plt.show()
             # create probe records
             with open(probe_dict_v['file_json'], 'w') as w_file:
                 w_file.write(json.dumps(filtered_probes))
