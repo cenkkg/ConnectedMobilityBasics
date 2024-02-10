@@ -70,25 +70,27 @@ def probe_selector():
                 n_no_probes_ids = [str(p['id']) for p in filtered_probes]
             else:
                 # select from clusters
-                print(probe_dict_k)
                 cluster_dict = {}
                 len_probes = len(filtered_probes)
+                # prepare dictionary of clusters
                 for i in range(len_probes):
                     if kmeans.labels_[i] not in cluster_dict:
                         cluster_dict[kmeans.labels_[i]] = []
                     cluster_dict[kmeans.labels_[i]].append(filtered_probes[i])
-                miss_count = 0
-                for _, cluster_dict_v in cluster_dict.items():
-                    if miss_count > 0 and len(cluster_dict_v) > 4:
-                        tmp_fetch = min(len(cluster_dict_v), 4+miss_count)
-                    else:
-                        tmp_fetch = min(len(cluster_dict_v), 4)
-                    miss_count += 4 - tmp_fetch
-                    tmp = cluster_dict_v[:tmp_fetch]
-                    for el in tmp:
-                        n_no_probes.append(el)
-                        n_no_probes_ids.append(str(el['id']))
-                print(miss_count)
+                # equally select from clusters
+                ind_counter = 0
+                while True:
+                    for _, cluster_dict_v in cluster_dict.items():
+                        if len(n_no_probes) >= 100:
+                            break
+                        if len(cluster_dict_v) > ind_counter:
+                            el = cluster_dict_v[ind_counter]
+                            n_no_probes.append(el)
+                            n_no_probes_ids.append(str(el['id']))
+                    ind_counter += 1
+                    if len(n_no_probes) >= 100:
+                        break
+
             # create selected probes json
             with open(probe_dict_v['file_100_json'].format(len(n_no_probes)), 'w') as w_file:
                 w_file.write(json.dumps(n_no_probes))
@@ -101,6 +103,9 @@ def probe_selector():
             plt.scatter(selected_probes_long, selected_probes_lat)
             plt.title("selected " + probe_dict_k)
             plt.show()
+            print(probe_dict_k)
+            print(len(n_no_probes))
+            print(len(n_no_probes_ids))
 
 
 if __name__ == "__main__":
