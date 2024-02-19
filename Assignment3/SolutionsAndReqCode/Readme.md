@@ -2,3 +2,5 @@
 
 Each used helpers which are used throughout the assignment for: choosing probes, plotting graphs and plots
 are included under the directory with the corresponding question number.
+
+We added required comments (How to run, what does it do etc.) to related '.ipynb' script.
